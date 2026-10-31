@@ -240,6 +240,7 @@ function clearHistory() {
 // 5. EXAM LIFECYCLE
 // ==========================================
 function startExam(examId, mode = "exam", customQuestions = null) {
+  document.body.classList.remove("dashboard-active");
   sfx.init();
   const examEntry = window.EXAMS_REGISTRY ? window.EXAMS_REGISTRY.find(e => e.id === examId) : null;
   if (!examEntry && !customQuestions) return;
@@ -368,6 +369,19 @@ function renderCurrentQuestion() {
     }
   }
   tagEl.textContent = displayCategory;
+
+  // Audio files are not included with the current English exam data. Tell students clearly.
+  const audioNoticeId = "listening-audio-notice";
+  let audioNotice = document.getElementById(audioNoticeId);
+  const isListening = /listening|kỹ năng nghe/i.test(q.part || "");
+  if (isListening && !audioNotice) {
+    audioNotice = document.createElement("div");
+    audioNotice.id = audioNoticeId;
+    audioNotice.className = "mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-base leading-relaxed text-amber-950";
+    audioNotice.innerHTML = "<strong class=\"block text-lg\">🔊 Phần nghe</strong><span>Đề gốc có yêu cầu nghe nhưng hiện chưa có file âm thanh. Em có thể luyện câu hỏi và xem lời giải; phần nghe sẽ cần bổ sung audio từ đề gốc.</span>";
+    document.getElementById("question-context-box").before(audioNotice);
+  }
+  if (audioNotice) audioNotice.classList.toggle("hidden", !isListening);
 
   // Reading Passage / Context Box (Compact)
   const contextBox = document.getElementById("question-context-box");
@@ -1057,15 +1071,13 @@ function renderDashboard() {
   if (!container || !window.EXAMS_REGISTRY) return;
 
   container.innerHTML = "";
-  const filterSubject = document.getElementById("filter-subject") ? document.getElementById("filter-subject").value : "all";
   const searchKeyword = (document.getElementById("search-exam-input")?.value || "").toLowerCase().trim();
 
   const filtered = window.EXAMS_REGISTRY.filter(exam => {
-    const matchSubject = filterSubject === "all" || exam.subject === filterSubject;
     const matchSearch = exam.title.toLowerCase().includes(searchKeyword) ||
                         exam.author.toLowerCase().includes(searchKeyword) ||
                         exam.tags.some(t => t.toLowerCase().includes(searchKeyword));
-    return matchSubject && matchSearch;
+    return matchSearch;
   });
 
   if (filtered.length === 0) {
@@ -1077,7 +1089,17 @@ function renderDashboard() {
     return;
   }
 
-  filtered.forEach(exam => {
+  const subjects = ["Tiếng Anh 8", "Toán 8"];
+  subjects.forEach(subject => {
+    const subjectExams = filtered.filter(exam => exam.subject === subject);
+    if (!subjectExams.length) return;
+    const section = document.createElement("section");
+    section.id = subject === "Tiếng Anh 8" ? "subject-english" : "subject-math";
+    section.className = "subject-section";
+    section.innerHTML = `<div class="mb-4 flex items-end justify-between gap-3"><div><h2 class="text-2xl sm:text-3xl font-black text-slate-900">${subject === "Tiếng Anh 8" ? "📘 Tiếng Anh 8" : "📐 Toán 8"}</h2><p class="mt-1 text-base text-slate-600">${subjectExams.length} bộ đề</p></div></div><div class="subject-exam-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"></div>`;
+    container.appendChild(section);
+    const grid = section.querySelector(".subject-exam-grid");
+    subjectExams.forEach(exam => {
     const card = document.createElement("div");
     card.className = "bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between";
 
@@ -1085,26 +1107,26 @@ function renderDashboard() {
       <div>
         <div class="flex items-center justify-between mb-2.5">
           <span class="text-xs font-bold px-2.5 py-0.5 rounded-md ${exam.badgeColor}">${exam.badge}</span>
-          <span class="text-xs font-semibold text-slate-500 flex items-center gap-1">
+          <span class="text-sm font-semibold text-slate-600 flex items-center gap-1">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             ${exam.durationMinutes} phút
           </span>
         </div>
 
-        <h3 class="font-bold text-slate-900 text-base leading-snug mb-1.5 hover:text-blue-600 cursor-pointer">${exam.title}</h3>
-        <p class="text-xs font-medium text-slate-500 mb-3">${exam.author} • ${exam.questionsCount} câu hỏi</p>
+        <h3 class="font-extrabold text-slate-900 text-lg leading-snug mb-2 hover:text-blue-600 cursor-pointer">${exam.title}</h3>
+        <p class="text-base font-medium text-slate-600 mb-3">${exam.author} • ${exam.questionsCount} câu</p>
 
         <div class="flex flex-wrap gap-1.5 mb-5">
-          ${exam.tags.map(t => `<span class="text-[11px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${t}</span>`).join("")}
+          ${exam.tags.map(t => `<span class="text-sm font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">${t}</span>`).join("")}
         </div>
       </div>
 
       <div class="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
-        <button class="btn-start-exam w-full py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer" data-id="${exam.id}">
+        <button class="btn-start-exam w-full min-h-14 py-3 px-3 rounded-xl font-extrabold text-base bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer" data-id="${exam.id}">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.5L19 7.5V19a2 2 0 01-2 2z"/></svg>
           Thi Thử
         </button>
-        <button class="btn-start-quiz w-full py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 flex items-center justify-center gap-1.5 transition-colors cursor-pointer" data-id="${exam.id}">
+        <button class="btn-start-quiz w-full min-h-14 py-3 px-3 rounded-xl font-extrabold text-base bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200 flex items-center justify-center gap-1.5 transition-colors cursor-pointer" data-id="${exam.id}">
           <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
           Game Quiz
         </button>
@@ -1113,7 +1135,8 @@ function renderDashboard() {
 
     card.querySelector(".btn-start-exam").addEventListener("click", () => startExam(exam.id, "exam"));
     card.querySelector(".btn-start-quiz").addEventListener("click", () => startExam(exam.id, "quiz"));
-    container.appendChild(card);
+    grid.appendChild(card);
+    });
   });
 }
 
@@ -1122,6 +1145,8 @@ function showDashboardView() {
   document.getElementById("view-exam").classList.add("hidden");
   document.getElementById("view-result").classList.add("hidden");
   document.getElementById("view-dashboard").classList.remove("hidden");
+  document.body.classList.add("dashboard-active");
+  document.getElementById("header-exam-title").textContent = "Ôn tập Lớp 8";
   renderDashboard();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -1204,8 +1229,7 @@ function renderMathInElement() {
 document.addEventListener("DOMContentLoaded", () => {
   loadSavedData();
 
-  // Dashboard filter & search
-  document.getElementById("filter-subject")?.addEventListener("change", renderDashboard);
+  // Dashboard search
   document.getElementById("search-exam-input")?.addEventListener("input", renderDashboard);
 
   // Top Navbar controls
@@ -1285,6 +1309,6 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .catch(() => {});
 
-  // Default: start with the mockup exam right away
-  startExam("ta8_tranganh_lan2", "exam");
+  // Open the subject and exam catalog first so students can choose what to practice.
+  showDashboardView();
 });

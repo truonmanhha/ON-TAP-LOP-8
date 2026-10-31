@@ -63,6 +63,24 @@ body {
   touch-action: manipulation;
 }
 
+/* Comfortable reading and touch targets for middle-school students */
+#question-text { font-size: clamp(1.2rem, 2vw, 1.55rem); line-height: 1.75; }
+#options-container .option-card { min-height: 4.25rem; padding: 1rem 1.1rem; font-size: 1.125rem; line-height: 1.65; }
+#options-container .option-card > div:first-child { width: 2rem; height: 2rem; font-size: .95rem; }
+.subject-section { scroll-margin-top: 1.5rem; }
+button, input, select { touch-action: manipulation; }
+body.dashboard-active #btn-back-home,
+body.dashboard-active #header-mode-badge,
+body.dashboard-active #btn-open-share,
+body.dashboard-active #btn-toggle-sound,
+body.dashboard-active #timer-pill { display: none !important; }
+
+@media (max-width: 640px) {
+  #question-text { font-size: 1.2rem; }
+  #options-container .option-card { min-height: 4rem; font-size: 1.05rem; }
+  .katex { font-size: 1.08em; }
+}
+
 .option-card:hover {
   border-color: #93C5FD;
   background-color: #F8FAFC;
