@@ -365,16 +365,14 @@
         <!-- ======================================================== -->
         <!-- REWARD / GIFT SECTION (The Requested Feature) -->
         <!-- ======================================================== -->
-        <div id="reward-gift-banner" class="mb-6 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-md relative overflow-hidden">
+    id="reward-gift-banner" class="hidden mb-6 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-md relative overflow-hidden">
           <div class="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
             <div class="flex items-center gap-4 text-left">
-              <div class="text-5xl sm:text-6xl gift-box-animate flex-shrink-0" onclick="openGiftBoxModal()" title="Chạm để mở quà!">
-                🎁
-              </div>
+              <div class="text-5xl sm:text-6xl gift-box-animate flex-shrink-0" onclick="openGiftBoxModal()" title="Chạm để mở quà!">🎁</div>
               <div>
-                <span class="px-2.5 py-0.5 rounded-full bg-white/20 text-[11px] font-extrabold uppercase tracking-wider inline-block mb-1">Quà Tặng Thưởng Đạt Chuẩn</span>
-                <h4 class="font-black text-lg sm:text-xl text-yellow-100">MỞ HỘP QUÀ BÍ ẨN MAY MẮN!</h4>
-                <p class="text-xs sm:text-sm text-amber-100">Bạn đã hoàn thành xuất sắc bài thi! Nhận Giấy Khen Danh Dự & Phiếu Thưởng ngay.</p>
+                <span class="px-2.5 py-0.5 rounded-full bg-white/20 text-[11px] font-extrabold uppercase tracking-wider inline-block mb-1">Mốc thưởng từ 8 điểm</span>
+                <h4 class="font-black text-lg sm:text-xl text-yellow-100">MỞ HỘP QUÀ MAY MẮN!</h4>
+                <p class="text-xs sm:text-sm text-amber-100">Nghe ting tong, nhận quà và giấy khen khi đạt từ 8 điểm.</p>
               </div>
             </div>
             <button onclick="openGiftBoxModal()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white text-orange-600 hover:bg-yellow-50 font-black text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer flex-shrink-0 animate-pulse">
@@ -701,6 +699,17 @@
       </div>
     </div>
   </div>
+
+
+      <!-- Score celebration overlay and progress feedback -->
+      <div id="score-celebration" class="score-celebration hidden" aria-live="polite">
+        <div class="score-celebration-card">
+          <div id="score-celebration-icon" class="score-celebration-icon">🎉</div>
+          <p id="score-celebration-message" class="score-celebration-message"></p>
+          <p id="score-celebration-detail" class="score-celebration-detail"></p>
+          <button type="button" onclick="closeScoreCelebration()" class="score-celebration-close">Xem kết quả</button>
+        </div>
+      </div>
 
   <!-- FOOTER -->
   <footer class="bg-white border-t border-slate-200/80 py-4 text-center text-xs text-slate-500 hidden lg:block">

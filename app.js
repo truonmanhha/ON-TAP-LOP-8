@@ -98,6 +98,15 @@ class SoundFX {
     this.playTone(880.00, 0.2, 'triangle', 0.2, 0.14);
   }
 
+  reward() {
+    [1046.5, 1567.98, 2093].forEach((freq, idx) => { this.playTone(freq, 0.28, idx === 2 ? 'triangle' : 'sine', 0.2, idx * 0.12); });
+  }
+
+  lowScore() {
+    this.playTone(392, 0.14, 'sine', 0.12, 0);
+    this.playTone(349.23, 0.2, 'sine', 0.12, 0.12);
+  }
+
   finish() {
     // Victory fanfare
     const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
@@ -736,14 +745,27 @@ function submitExam() {
   };
   saveHistoryItem(historyItem);
 
-  // Victory Fanfare & Confetti
-  sfx.finish();
-  if (finalScore >= 7.0) {
-    setTimeout(launchConfetti, 250);
-  }
-
-  // Render Result Screen
+  // Render first so feedback and celebration play on the result screen.
   renderResultScreen(historyItem);
+  const feedback = getScoreFeedback(finalScore);
+  if (finalScore >= 8) {
+    sfx.reward();
+    [250, 950, 1650].forEach(delay => setTimeout(launchConfetti, delay));
+  } else if (finalScore >= 6) {
+    sfx.correct();
+  } else {
+    sfx.lowScore();
+  }
+  showCelebrationToast(feedback.message, feedback.type);
+  if (finalScore >= 9) setTimeout(launchConfetti, 2400);
+}
+
+function getScoreFeedback(score) {
+  if (score >= 9) return { message: "🏆 Xuất sắc! Thành tích quá đỉnh — mở quà thôi!", type: "streak" };
+  if (score >= 8) return { message: "🎉 Giỏi lắm! Ting tong — bạn nhận được hộp quà!", type: "success" };
+  if (score >= 6) return { message: "👍 Tạm ổn! Ôn thêm một chút là lên điểm ngay.", type: "info" };
+  if (score >= 5) return { message: "💪 Cố gắng thêm nhé — xem lại câu sai rồi thử lại!", type: "info" };
+  return { message: "📚 Chưa đạt mục tiêu lần này. Bình tĩnh xem lời giải, luyện thêm rồi thử lại nhé!", type: "info" };
 }
 
 function renderResultScreen(item) {
@@ -757,28 +779,25 @@ function renderResultScreen(item) {
   document.getElementById("result-correct-count").textContent = `${item.correctCount} / ${item.totalCount}`;
   document.getElementById("result-time-spent").textContent = item.timeSpent;
 
-  // Rank badge
+  // Score feedback and rank follow the requested score bands.
   const rankEl = document.getElementById("result-rank-badge");
-  if (item.score >= 9.0) {
-    rankEl.textContent = "Xuất sắc 🌟";
-    rankEl.className = "px-4 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-amber-100 text-amber-800 border border-amber-300";
-  } else if (item.score >= 8.0) {
-    rankEl.textContent = "Giỏi 🥇";
-    rankEl.className = "px-4 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300";
-  } else if (item.score >= 6.5) {
-    rankEl.textContent = "Khá 🥈";
-    rankEl.className = "px-4 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-blue-100 text-blue-800 border border-blue-300";
-  } else {
-    rankEl.textContent = "Cần ôn tập thêm 📚";
-    rankEl.className = "px-4 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-rose-100 text-rose-800 border border-rose-300";
-  }
+  const feedback = getScoreFeedback(item.score);
+  rankEl.textContent = feedback.message;
+  rankEl.className = item.score >= 8
+    ? "px-4 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-amber-100 text-amber-800 border border-amber-300"
+    : item.score >= 6
+    ? "px-4 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-blue-100 text-blue-800 border border-blue-300"
+    : item.score >= 5
+    ? "px-4 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-orange-100 text-orange-800 border border-orange-300"
+    : "px-4 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-rose-100 text-rose-800 border border-rose-300";
 
-  // Setup Gift Banner
   const giftBanner = document.getElementById("reward-gift-banner");
-  if (item.score >= 7.0) {
-    giftBanner.classList.remove("hidden");
-  } else {
-    giftBanner.classList.remove("hidden"); // Always show to encourage student!
+  const eligible = item.score >= 8;
+  giftBanner.classList.toggle("hidden", !eligible);
+  if (eligible) {
+    giftBanner.querySelector("h4").textContent = item.score >= 9 ? "HỘP QUÀ XUẤT SẮC ĐANG CHỜ BẠN!" : "MỞ HỘP QUÀ MAY MẮN!";
+    giftBanner.querySelector("p").textContent = "Mốc 8 điểm trở lên: mở hộp quà, nghe ting tong và nhận giấy khen danh dự.";
+    giftBanner.querySelector("button span").textContent = "🎉 MỞ QUÀ NGAY";
   }
 
   // Populate Certificate Data
@@ -811,8 +830,8 @@ function renderResultScreen(item) {
 // 10. REWARD GIFT BOX & CERTIFICATE LOGIC
 // ==========================================
 function openGiftBoxModal() {
-  sfx.finish();
-  launchConfetti();
+  sfx.reward();
+  [0, 600, 1200].forEach(delay => setTimeout(launchConfetti, delay));
   rerollVoucher();
   document.getElementById("modal-gift-reward").classList.remove("hidden");
 }
