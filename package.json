@@ -2,7 +2,6 @@
   "name": "on-tap-lop-8",
   "version": "1.0.0",
   "description": "Hệ thống thi thử & Game Quiz Tiếng Anh 8 và Toán 8",
-  "main": "index.html",
   "scripts": {
     "start": "node server.js"
   },
