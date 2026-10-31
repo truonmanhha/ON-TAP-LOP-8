@@ -464,7 +464,7 @@ body.halloween-theme .exam-card:hover {
   box-shadow: 0 16px 34px rgba(0, 0, 0, .32), 0 0 28px rgba(194, 65, 12, .13);
 }
 body.halloween-theme .exam-card-art {
-  height: 5.5rem;
+  height: 6rem;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -510,18 +510,12 @@ body.halloween-theme .exam-card-stars {
 body.halloween-theme .exam-card-creature {
   display: grid;
   place-items: center;
-  width: 4.25rem;
-  height: 4.25rem;
-  font-size: 2.75rem;
+  width: 5rem;
+  height: 5rem;
+  font-size: 3.8rem;
   line-height: 1;
-  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, .38));
+  filter: drop-shadow(0 0 1px rgba(255, 247, 237, .8)) drop-shadow(0 0 10px rgba(249, 115, 22, .25)) drop-shadow(0 6px 8px rgba(0, 0, 0, .38));
   animation: halloween-card-float 3.8s ease-in-out infinite;
-}
-body.halloween-theme .exam-card-creature svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
 }
 body.halloween-theme .subject-exam-grid > .exam-card:nth-child(3n + 2) .exam-card-art {
   background: linear-gradient(105deg, #25202d, #302337 58%, #242228);
