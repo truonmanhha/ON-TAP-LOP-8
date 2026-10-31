@@ -119,6 +119,48 @@ class SoundFX {
 
 const sfx = new SoundFX();
 
+class QuizAudio {
+  constructor() {
+    this.wrong = new Audio("assets/audio/wrong-answer.mp3");
+    this.theme = new Audio("assets/audio/quiz-theme.mp3");
+    this.wrong.preload = "auto";
+    this.theme.preload = "auto";
+    this.theme.loop = true;
+    this.theme.volume = 0.3;
+    this.wrong.volume = 0.8;
+  }
+
+  start() {
+    if (!state.soundEnabled) return;
+    this.theme.currentTime = 0;
+    this.theme.play().catch(() => {});
+  }
+
+  stop() {
+    this.theme.pause();
+    this.theme.currentTime = 0;
+  }
+
+  playWrong() {
+    if (!state.soundEnabled) return;
+    this.wrong.pause();
+    this.wrong.currentTime = 0;
+    this.wrong.play().catch(() => {});
+  }
+
+  setEnabled(enabled) {
+    if (!enabled) {
+      this.stop();
+      this.wrong.pause();
+      this.wrong.currentTime = 0;
+    } else if (state.currentExam && !state.isSubmitted) {
+      this.start();
+    }
+  }
+}
+
+const quizAudio = new QuizAudio();
+
 // ==========================================
 // 2. CONFETTI ANIMATION (Pure Canvas)
 // ==========================================
@@ -247,6 +289,7 @@ function startExam(examId, mode = "exam", customQuestions = null) {
   sfx.init();
   const examEntry = window.EXAMS_REGISTRY ? window.EXAMS_REGISTRY.find(e => e.id === examId) : null;
   if (!examEntry && !customQuestions) return;
+  quizAudio.start();
 
   let baseData = customQuestions ? {
     id: "retry_custom_" + Date.now(),
@@ -763,7 +806,7 @@ function handleOptionClick(key) {
 
     } else {
       state.quizStreak = 0;
-      sfx.wrong();
+      quizAudio.playWrong();
       showCelebrationToast("😅 Tiếc quá! Xem lời giải bên dưới nhé!", "info");
     }
     updateStreakDisplay();
@@ -945,6 +988,7 @@ function closeSubmitConfirmModal() {
 }
 
 function submitExam() {
+  quizAudio.stop();
   closeSubmitConfirmModal();
   clearInterval(state.timerInterval);
   state.isSubmitted = true;
@@ -1407,6 +1451,7 @@ function renderDashboard() {
 }
 
 function showDashboardView() {
+  quizAudio.stop();
   clearInterval(state.timerInterval);
   document.getElementById("view-exam").classList.add("hidden");
   document.getElementById("view-result").classList.add("hidden");
@@ -1518,6 +1563,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const soundBtn = document.getElementById("btn-toggle-sound");
   soundBtn?.addEventListener("click", () => {
     state.soundEnabled = !state.soundEnabled;
+    quizAudio.setEnabled(state.soundEnabled);
     soundBtn.innerHTML = state.soundEnabled ? `
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
       <span class="hidden lg:inline">Bật âm</span>
