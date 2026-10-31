@@ -188,7 +188,7 @@ window.EXAM_MATH_TINHHOA_4 = {
         { key: "D", text: "Vô số" }
       ],
       correctAnswer: "A",
-      explanation: "Đặt nhân tử chung $3x$ ra ngoài:\n$$3x(4x^2 - 9) = 0 \\implies 3x(2x - 3)(2x + 3) = 0$$\n$$\\implies x = 0 \\quad \\text{hoặc} \\quad x = \\frac{3}{2} \\quad \\text{hoặc} \\quad x = -\\frac{3}{2}$$\nVậy có đúng 3 giá trị của $x$ thỏa mãn."
+      explanation: "Đặt nhân tử chung $3x$ ra ngoài:\n$$3x(4x^2 - 9) = 0 \\implies 3x(2x - 3)(2x + 3) = 0$$\nCác nghiệm là $$x = 0, \\quad x = \\frac{3}{2}, \\quad x = -\\frac{3}{2}$$.\nVậy có đúng 3 giá trị của $x$ thỏa mãn."
     },
     {
       id: 14,

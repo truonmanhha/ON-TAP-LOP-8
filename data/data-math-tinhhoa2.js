@@ -216,7 +216,7 @@ window.EXAM_MATH_TINHHOA_2 = {
         { key: "D", text: "$120^\\circ$" }
       ],
       correctAnswer: "A",
-      explanation: "Hình thang vuông có 2 góc vuông ($90^\\circ$). Hai góc còn lại kề một cạnh bên không vuông có tổng bằng $180^\\circ$ (hai góc trong cùng phía bù nhau):\n$$\\text{Góc còn lại} = 180^\\circ - 75^\\circ = 105^\\circ$$."
+      explanation: "Hình thang vuông có 2 góc vuông ($90^\\circ$). Hai góc còn lại kề một cạnh bên không vuông có tổng bằng $180^\\circ$ (hai góc trong cùng phía bù nhau). Góc còn lại: $$180^\\circ - 75^\\circ = 105^\\circ$$."
     },
     {
       id: 16,
