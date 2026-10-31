@@ -377,6 +377,10 @@ body.halloween-theme .bg-white\/95 {
   background-color: #252528 !important;
   color: #f4f4f5 !important;
 }
+body.halloween-theme .halloween-hero .bg-white {
+  background-color: #3b2418 !important;
+  color: #fed7aa !important;
+}
 body.halloween-theme .bg-slate-50 { background-color: #202023 !important; }
 body.halloween-theme .bg-slate-100 { background-color: #303035 !important; }
 body.halloween-theme .bg-slate-200 { background-color: #3f3f46 !important; }
@@ -442,11 +446,7 @@ body.halloween-theme .halloween-hero h2 {
   font-family: Arial, "Segoe UI", Tahoma, sans-serif;
   text-shadow: 0 2px 18px rgba(0, 0, 0, .38);
 }
-body.halloween-theme #view-dashboard .halloween-hero .bg-white {
-  background-color: #f97316 !important;
-  color: #171717 !important;
-}
-body.halloween-theme #view-dashboard .halloween-hero .text-blue-700 { color: #171717 !important; }
+body.halloween-theme #view-dashboard .halloween-hero .text-blue-700 { color: #fed7aa !important; }
 body.halloween-theme #view-dashboard .halloween-hero .bg-white\/15 { background-color: rgba(255, 255, 255, .12) !important; }
 body.halloween-theme #view-dashboard .halloween-hero .text-blue-100 { color: #f4d8c4 !important; }
 
