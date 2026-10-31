@@ -675,7 +675,7 @@ function renderCurrentQuestion() {
           <span id="quiz-feedback-answer" class="text-xs text-rose-800 font-bold">Đáp án là: <b>${q.correctAnswer}</b></span>
         `}
       </div>
-      <div class="text-xs sm:text-sm mt-2 text-slate-700 bg-white/90 p-3 rounded-lg border border-slate-200 leading-relaxed">
+      <div class="quiz-explanation text-xs sm:text-sm mt-2 text-slate-700 bg-white/90 p-3 rounded-lg border border-slate-200 leading-relaxed">
         <b class="text-slate-900 block mb-0.5">💡 Lời giải chi tiết:</b>
         <div class="whitespace-pre-line">${formatMathText(q.explanation)}</div>
       </div>
