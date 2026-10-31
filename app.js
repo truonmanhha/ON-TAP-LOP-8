@@ -480,10 +480,10 @@ function buildAnsweredContext(context, question) {
   const selected = question.options?.find(option => option.key === state.userAnswers[question.id]);
   let html = context;
   active.forEach(number => {
-    const answerPart = selected.text.split(/\s*[-–—]\s*/).find(part => new RegExp(`\\|\\s*${number}\\s*\\|`).test(part));
+    const answerPart = selected?.text.split(/\s*[-–—]\s*/).find(part => new RegExp(`\\|\\s*${number}\\s*\\|`).test(part));
     const answer = answerPart
       ? answerPart.replace(new RegExp(`^.*?\\|\\s*${number}\\s*\\|\\s*`), "").trim()
-      : (active.length === 1 ? selected.text : null);
+      : (active.length === 1 ? selected?.text : null);
     const pattern = new RegExp(`\\(\\s*${number}\\s*\\)\\s*_{2,}`);
     html = html.replace(pattern, answer
       ? `<mark class="answered-blank">(${number}) ${answer}</mark>`
