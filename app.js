@@ -611,6 +611,9 @@ function renderCurrentQuestion() {
   const feedbackAnswer = document.getElementById("quiz-feedback-answer");
   if (feedbackAnswer) feedbackAnswer.innerHTML = `Đáp án đúng: ${correctOption?.key || q.correctAnswer} · ${formatMathText(getMappedOptionText(correctOption?.text || "", q))}`;
   if (answerHint) {
+    answerHint.innerHTML = "";
+    answerHint.classList.add("hidden");
+    if (state.isSubmitted) {
     const blankNumbers = getActiveBlankNumbers(q);
     const sequence = getArrangementSolution(q);
     if (blankNumbers.length === 1) {
@@ -626,6 +629,7 @@ function renderCurrentQuestion() {
     } else {
       answerHint.innerHTML = "";
       answerHint.classList.add("hidden");
+    }
     }
   }
 
