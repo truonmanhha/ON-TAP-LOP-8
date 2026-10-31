@@ -1352,12 +1352,20 @@ function renderDashboard() {
     section.innerHTML = `<div class="mb-4 flex items-end justify-between gap-3"><div><h2 class="text-2xl sm:text-3xl font-black text-slate-900">${subject === "Tiếng Anh 8" ? "📘 Tiếng Anh 8" : "📐 Toán 8"}</h2><p class="mt-1 text-base text-slate-600">${subjectExams.length} bộ đề</p></div></div><div class="subject-exam-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"></div>`;
     container.appendChild(section);
     const grid = section.querySelector(".subject-exam-grid");
-    subjectExams.forEach(exam => {
+    subjectExams.forEach((exam, examIndex) => {
     const card = document.createElement("div");
-    card.className = "bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between";
+    card.className = "exam-card bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between";
+    const halloweenCreatures = subject === "Tiếng Anh 8"
+      ? ["🎃", "👻", "🦇", "🧙‍♀️", "🕷️"]
+      : ["🧙‍♂️", "💀", "🐈‍⬛", "🎃", "👻"];
+    const creature = halloweenCreatures[examIndex % halloweenCreatures.length];
 
     card.innerHTML = `
       <div>
+        <div class="exam-card-art" aria-hidden="true">
+          <span class="exam-card-stars">✦　·　✧</span>
+          <span class="exam-card-creature">${creature}</span>
+        </div>
         <div class="flex items-center justify-between mb-2.5">
           <span class="text-xs font-bold px-2.5 py-0.5 rounded-md ${exam.badgeColor}">${exam.badge}</span>
           <span class="text-sm font-semibold text-slate-600 flex items-center gap-1">
