@@ -418,6 +418,62 @@ function questionNeedsAudioSkip(q) {
   return !!config?.audioUnavailable && /listening|kỹ năng nghe/i.test(q.part || "");
 }
 
+function getQuestionBlankNumbers(q) {
+  const source = `${q.question || ""} ${q.instruction || ""}`;
+  const matches = [...source.matchAll(/blank\s*\(?\s*(\d+)\s*\)?|chỗ trống\s*\(?\s*(\d+)\s*\)?/ig)];
+  return [...new Set(matches.map(match => match[1] || match[2]))];
+}
+
+function getPassageBlankNumbers(context = "") {
+  return [...new Set([...context.matchAll(/\((\d+)\)\s*_{2,}/g)].map(match => match[1]))];
+}
+
+function getActiveBlankNumbers(question) {
+  const questionNumbers = getQuestionBlankNumbers(question);
+  return questionNumbers.length ? questionNumbers : getPassageBlankNumbers(question.context || "");
+}
+
+function buildResolvedContext(context, question) {
+  if (!context) return "";
+  let html = context;
+  const blankNumbers = getPassageBlankNumbers(context);
+  const activeBlankNumbers = getActiveBlankNumbers(question);
+  blankNumbers.forEach(blankNumber => {
+    if (!activeBlankNumbers.includes(blankNumber)) return;
+    const option = question.options?.find(item => item.key === question.correctAnswer);
+    if (!option) return;
+    const answerForBlank = option.text
+      .split(/\s*[-–—]\s*/)
+      .find(part => new RegExp(`\\|\\s*${blankNumber}\\s*\\|`).test(part));
+    const answerText = answerForBlank
+      ? answerForBlank.replace(new RegExp(`^.*?\\|\\s*${blankNumber}\\s*\\|\\s*`), "").trim()
+      : (activeBlankNumbers.length === 1 ? option.text : null);
+    if (!answerText) return;
+    const escapedAnswer = answerText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const blankPattern = new RegExp(`\\(\\s*${blankNumber}\\s*\\)\\s*_{2,}`, "g");
+    html = html.replace(blankPattern, `<mark class="resolved-blank">(${blankNumber}) ${escapedAnswer}</mark>`);
+  });
+  return html;
+}
+
+function getMappedOptionText(optionText, question) {
+  if (!/\|\s*\d+\s*\|/.test(optionText)) {
+    const blankNumbers = getActiveBlankNumbers(question);
+    return blankNumbers.length === 1 ? `(${blankNumbers[0]}) ${optionText}` : optionText;
+  }
+  return optionText.split(/\s*[–—-]\s*/).map(part => {
+    const match = part.match(/\|\s*(\d+)\s*\|\s*(.*)/);
+    return match ? `(${match[1]}) ${match[2]}` : part.trim();
+  }).join("  →  ");
+}
+
+function getArrangementSolution(question) {
+  const answer = question.options?.find(option => option.key === question.correctAnswer)?.text || "";
+  return /arrange|logical (?:dialogue|letter|paragraph) order|correct sequence/i.test(`${question.question || ""} ${question.instruction || ""}`)
+    ? answer.replace(/\s*[–—-]\s*/g, " → ")
+    : "";
+}
+
 function renderCurrentQuestion() {
   const q = state.currentExam.questions[state.currentIndex];
   if (!q) return;
@@ -481,7 +537,7 @@ function renderCurrentQuestion() {
     contextBox.classList.remove("hidden");
     contextContent.innerHTML = `
       <div class="text-base sm:text-lg text-slate-800 leading-relaxed whitespace-pre-line bg-white p-4 rounded-xl border border-slate-200 font-medium max-h-72 overflow-y-auto">
-        ${q.context}
+        ${buildResolvedContext(q.context, q)}
       </div>
     `;
   } else {
@@ -490,7 +546,11 @@ function renderCurrentQuestion() {
 
   // Question Stem Text
   const textEl = document.getElementById("question-text");
-  textEl.innerHTML = formatMathText(q.question);
+  const passageBlankNumbers = getPassageBlankNumbers(q.context || "");
+  const isMultiBlankSequence = passageBlankNumbers.length > 1 && !getQuestionBlankNumbers(q).length;
+  textEl.innerHTML = formatMathText(isMultiBlankSequence
+    ? `Chọn cách điền cho các chỗ trống ${passageBlankNumbers.map(number => `(${number})`).join(", ")}:`
+    : q.question);
 
   // Options rendering
   const optionsContainer = document.getElementById("options-container");
@@ -536,13 +596,36 @@ function renderCurrentQuestion() {
         ` : opt.key}
       </div>
       <div class="flex-1 font-semibold text-slate-800">
-        <span>${formatMathText(opt.text)}</span>
+        <span>${formatMathText(getMappedOptionText(opt.text, q))}</span>
       </div>
     `;
 
     card.addEventListener("click", () => handleOptionClick(opt.key));
     optionsContainer.appendChild(card);
   });
+
+  const answerHint = document.getElementById("question-answer-hint");
+  const correctOption = q.options.find(option => option.key === q.correctAnswer);
+  const feedbackAnswer = document.getElementById("quiz-feedback-answer");
+  if (feedbackAnswer) feedbackAnswer.innerHTML = `Đáp án đúng: ${correctOption?.key || q.correctAnswer} · ${formatMathText(getMappedOptionText(correctOption?.text || "", q))}`;
+  if (answerHint) {
+    const blankNumbers = getActiveBlankNumbers(q);
+    const sequence = getArrangementSolution(q);
+    if (blankNumbers.length === 1) {
+      const blankNumber = blankNumbers[0];
+      answerHint.innerHTML = `<span class="hint-number">(${blankNumber})</span><span>Chỗ trống ${blankNumber}: <b>${correctOption?.key || ""} · ${formatMathText(correctOption?.text || "")}</b></span>`;
+      answerHint.classList.remove("hidden");
+    } else if (blankNumbers.length > 1) {
+      answerHint.innerHTML = `<span>Đáp án đúng · ${correctOption?.key || ""}</span><b>${formatMathText(getMappedOptionText(correctOption?.text || "", q))}</b>`;
+      answerHint.classList.remove("hidden");
+    } else if (sequence) {
+      answerHint.innerHTML = `<span>Thứ tự đúng</span><b>${sequence}</b>`;
+      answerHint.classList.remove("hidden");
+    } else {
+      answerHint.innerHTML = "";
+      answerHint.classList.add("hidden");
+    }
+  }
 
   // Quiz Mode Immediate Feedback Banner
   const quizFeedbackBox = document.getElementById("quiz-feedback-box");
@@ -559,7 +642,7 @@ function renderCurrentQuestion() {
           <span class="text-xs bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full font-bold">+10 XP</span>
         ` : `
           <span class="text-rose-700 text-base">❌ Chưa đúng rồi!</span>
-          <span class="text-xs text-rose-800 font-bold">Đáp án là: <b>${q.correctAnswer}</b></span>
+          <span id="quiz-feedback-answer" class="text-xs text-rose-800 font-bold">Đáp án là: <b>${q.correctAnswer}</b></span>
         `}
       </div>
       <div class="text-xs sm:text-sm mt-2 text-slate-700 bg-white/90 p-3 rounded-lg border border-slate-200 leading-relaxed">
@@ -1131,7 +1214,13 @@ function renderDetailedReview() {
       ` : ""}
 
       ${q.context ? `
-        <div class="text-base text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-200 mb-3 whitespace-pre-line">${q.context}</div>
+        <div class="text-base text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-200 mb-3 whitespace-pre-line">${buildResolvedContext(q.context, q)}</div>
+      ` : ""}
+
+      ${getActiveBlankNumbers(q).length ? `
+        <div class="resolved-answer-map mb-3"><span>Đáp án đúng · ${q.correctAnswer}</span><b>${formatMathText(getMappedOptionText(q.options.find(option => option.key === q.correctAnswer)?.text || "", q))}</b></div>
+      ` : getArrangementSolution(q) ? `
+        <div class="resolved-answer-map mb-3"><span>Thứ tự đúng</span><b>${getArrangementSolution(q)}</b></div>
       ` : ""}
 
       <div class="font-semibold text-slate-900 mb-4 text-lg sm:text-xl leading-relaxed">${formatMathText(q.question)}</div>
@@ -1149,7 +1238,7 @@ function renderDetailedReview() {
           return `
             <div class="${optClass}">
               <span class="w-6 h-6 rounded-md ${opt.key === q.correctAnswer ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'} flex items-center justify-center font-bold text-xs flex-shrink-0">${opt.key}</span>
-              <span class="flex-1">${formatMathText(opt.text)}</span>
+              <span class="flex-1">${formatMathText(getMappedOptionText(opt.text, q))}</span>
               ${opt.key === q.correctAnswer ? '<span class="text-[11px] text-emerald-700 font-bold ml-auto whitespace-nowrap">Đáp án đúng</span>' : ''}
             </div>
           `;

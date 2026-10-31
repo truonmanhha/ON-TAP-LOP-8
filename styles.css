@@ -79,6 +79,10 @@ body.dashboard-active #mobile-bottom-bar { display: none !important; }
 #btn-prev, #btn-next, #btn-flag, #btn-clear-selection { min-height: 3.25rem; font-size: 1rem; }
 .audio-skip-notice { box-shadow: 0 4px 14px rgba(190, 24, 93, .08); }
 .q-btn.skipped { background: #ffe4e6; border: 2px solid #e11d48; color: #9f1239; }
+.resolved-answer-map { display:flex; flex-wrap:wrap; align-items:center; gap:.55rem; border:1px solid #bfdbfe; background:#eff6ff; color:#1e3a8a; border-radius:1rem; padding:.8rem 1rem; font-size:1rem; line-height:1.65; }
+.resolved-answer-map b { color:#172554; }
+.resolved-blank { background:#dcfce7; color:#14532d; border:1px solid #86efac; border-radius:.4rem; padding:.05rem .3rem; font-weight:800; }
+.hint-number { display:inline-flex; align-items:center; border-radius:.55rem; background:#dbeafe; color:#1d4ed8; padding:.1rem .45rem; font-weight:900; }
 
 @media (max-width: 640px) {
   #question-text { font-size: 1.28rem; }
