@@ -485,6 +485,39 @@ body.halloween-theme .score-celebration-card { background: linear-gradient(145de
 body.halloween-theme .score-celebration-detail { color: #e4d4c8; }
 body.halloween-theme .score-celebration-close { background: #e85d04; }
 
+/* Keep answer review panels readable in dark mode while retaining status colors. */
+body.halloween-theme #review-questions-list .bg-emerald-50 {
+  background-color: #12352b !important;
+  color: #d1fae5 !important;
+}
+body.halloween-theme #review-questions-list .bg-rose-50 {
+  background-color: #3b1c24 !important;
+  color: #ffe4e6 !important;
+}
+body.halloween-theme #review-questions-list .bg-slate-50\/50 {
+  background-color: #29292e !important;
+  color: #e4e4e7 !important;
+}
+body.halloween-theme #review-questions-list .bg-blue-50\/70 {
+  background-color: #202b3a !important;
+  border-color: #3b4c63 !important;
+  color: #e2e8f0 !important;
+}
+body.halloween-theme #review-questions-list .text-emerald-950,
+body.halloween-theme #review-questions-list .text-emerald-900,
+body.halloween-theme #review-questions-list .text-emerald-800,
+body.halloween-theme #review-questions-list .text-emerald-700 { color: #a7f3d0 !important; }
+body.halloween-theme #review-questions-list .text-rose-950,
+body.halloween-theme #review-questions-list .text-rose-900,
+body.halloween-theme #review-questions-list .text-rose-800 { color: #fecdd3 !important; }
+body.halloween-theme #review-questions-list .text-blue-900,
+body.halloween-theme #review-questions-list .text-blue-800,
+body.halloween-theme #review-questions-list .text-blue-700,
+body.halloween-theme #review-questions-list .text-blue-600 { color: #bfdbfe !important; }
+body.halloween-theme #review-questions-list .border-emerald-500 { border-color: #34d399 !important; }
+body.halloween-theme #review-questions-list .border-rose-400 { border-color: #fb7185 !important; }
+body.halloween-theme #review-questions-list .border-blue-200\/80 { border-color: #3b4c63 !important; }
+
 @media (max-width: 640px) {
   body.halloween-theme .halloween-hero::after { right: 1rem; top: auto; bottom: 1rem; font-size: 4.2rem; opacity: .25; }
   body.halloween-theme .halloween-hero::before { width: 70%; }
