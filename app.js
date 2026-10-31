@@ -478,16 +478,16 @@ function buildAnsweredContext(context, question) {
   if (!context) return "";
   const active = getActiveBlankNumbers(question);
   const selected = question.options?.find(option => option.key === state.userAnswers[question.id]);
-  if (!selected) return context;
   let html = context;
   active.forEach(number => {
     const answerPart = selected.text.split(/\s*[-–—]\s*/).find(part => new RegExp(`\\|\\s*${number}\\s*\\|`).test(part));
     const answer = answerPart
       ? answerPart.replace(new RegExp(`^.*?\\|\\s*${number}\\s*\\|\\s*`), "").trim()
       : (active.length === 1 ? selected.text : null);
-    if (!answer) return;
     const pattern = new RegExp(`\\(\\s*${number}\\s*\\)\\s*_{2,}`);
-    html = html.replace(pattern, `<mark class="answered-blank">(${number}) ${answer}</mark>`);
+    html = html.replace(pattern, answer
+      ? `<mark class="answered-blank">(${number}) ${answer}</mark>`
+      : `<mark class="answered-blank">(${number}) ________</mark>`);
   });
   return html;
 }
