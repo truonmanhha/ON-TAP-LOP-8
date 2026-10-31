@@ -26,9 +26,9 @@
   </script>
 
   <!-- KaTeX for Math Equation Rendering -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <script defer src="vendor/katex/katex.min.js"></script>
+  <script defer src="vendor/katex/contrib/auto-render.min.js"></script>
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="styles.css">
@@ -150,6 +150,7 @@
           </div>
 
           <!-- Context / Reading Passage Box (Streamlined & collapsible) -->
+          <div id="question-instruction-box" class="hidden mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-base sm:text-lg leading-relaxed text-slate-800"></div>
           <div id="question-context-box" class="hidden mb-4 bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200">
             <div id="question-context-content"></div>
           </div>
@@ -348,6 +349,7 @@
             <span class="text-lg sm:text-xl font-bold text-blue-600">Đã lưu ✓</span>
           </div>
         </div>
+        <p id="result-skipped-note" class="hidden mx-auto mb-5 max-w-xl rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-base font-semibold text-rose-800"></p>
 
         <!-- ======================================================== -->
         <!-- REWARD / GIFT SECTION -->
@@ -716,6 +718,7 @@
   <script src="data/data-math-tinhhoa2.js"></script>
   <script src="data/data-math-tinhhoa3.js"></script>
   <script src="data/data-math-tinhhoa4.js"></script>
+  <script src="data/exam-review-config.js"></script>
   <script src="data/exams-registry.js"></script>
   <script src="app.js"></script>
 

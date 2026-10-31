@@ -8,6 +8,7 @@ const state = {
   mode: "exam", // "exam" (Thi thử chuẩn) | "quiz" (Game Quiz tức thì)
   currentIndex: 0,
   userAnswers: {},       // { [questionId]: "A" | "B" | ... }
+  skippedQuestions: {},  // { [questionId]: true } Questions explicitly skipped because the audio is missing
   flaggedQuestions: {},  // { [questionId]: boolean }
   quizFeedback: {},      // in quiz mode: { [questionId]: { answered: true, isCorrect: true } }
   timeRemaining: 0,      // in seconds
@@ -191,7 +192,9 @@ function showCelebrationToast(text, type = "success") {
   if (!container) return;
 
   const toast = document.createElement("div");
-  const bg = type === "streak" 
+  const bg = type === "error"
+    ? "bg-rose-700 text-white border-rose-500"
+    : type === "streak"
     ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-300"
     : type === "success" 
     ? "bg-emerald-600 text-white border-emerald-400"
@@ -245,7 +248,7 @@ function startExam(examId, mode = "exam", customQuestions = null) {
   const examEntry = window.EXAMS_REGISTRY ? window.EXAMS_REGISTRY.find(e => e.id === examId) : null;
   if (!examEntry && !customQuestions) return;
 
-  const baseData = customQuestions ? {
+  let baseData = customQuestions ? {
     id: "retry_custom_" + Date.now(),
     title: "LÀM LẠI CÁC CÂU SAI - " + (state.currentExam ? state.currentExam.shortTitle : "ÔN TẬP"),
     subject: state.currentExam ? state.currentExam.subject : "Tiếng Anh 8",
@@ -254,10 +257,26 @@ function startExam(examId, mode = "exam", customQuestions = null) {
     totalQuestions: customQuestions.length
   } : examEntry.getData();
 
+  if (!customQuestions && baseData) {
+    const config = window.EXAM_REVIEW_CONFIG?.[baseData.id];
+    if (config?.answerOverrides) {
+      Object.entries(config.answerOverrides).forEach(([questionId, answer]) => {
+        const question = baseData.questions.find(item => String(item.id) === String(questionId));
+        if (question && question.options.some(option => option.key === answer)) question.correctAnswer = answer;
+      });
+    }
+    const issues = validateExamData(baseData, examEntry);
+    if (issues.length) {
+      console.error(`[Kiểm tra đề: ${baseData.title}]`, issues);
+      showCelebrationToast(`Đề có ${issues.length} lỗi dữ liệu cần rà soát.`, "error");
+    }
+  }
+
   state.currentExam = baseData;
   state.mode = mode;
   state.currentIndex = 0;
   state.userAnswers = {};
+  state.skippedQuestions = {};
   state.flaggedQuestions = {};
   state.quizFeedback = {};
   state.isSubmitted = false;
@@ -336,6 +355,69 @@ function updateTimerDisplay() {
 // ==========================================
 // 6. QUESTION RENDERING (Streamlined & Minimalist)
 // ==========================================
+function getQuestionPartLabel(part = "") {
+  const value = part.toLocaleLowerCase("vi");
+  if (/listening|kỹ năng nghe/.test(value)) return "Nghe";
+  if (/tự luận/.test(value)) return "Tự luận";
+  if (/trả lời ngắn/.test(value)) return "Trả lời ngắn";
+  if (/phần\s*\d+/.test(value)) return value.match(/phần\s*\d+/)[0].replace(/\s+/g, " ").replace(/^./, c => c.toUpperCase());
+  if (/pronunciation|phonetics|phát âm/.test(value)) return "Phát âm";
+  if (/stress|trọng âm/.test(value)) return "Trọng âm";
+  if (/reading|đọc hiểu|đọc điền|cloze|gap fill|advertisement|leaflet|announcement/.test(value)) return "Đọc hiểu";
+  if (/sign|biển báo|notice/.test(value)) return "Biển báo";
+  if (/writing|viết|sentence/.test(value)) return "Viết";
+  if (/grammar|vocabulary|ngữ pháp|từ vựng/.test(value)) return "Ngữ pháp · Từ vựng";
+  if (/dictionary|tra từ điển/.test(value)) return "Tra từ điển";
+  if (/multiple choice|trắc nghiệm/.test(value)) return "Trắc nghiệm";
+  return "Câu hỏi";
+}
+
+function shouldShowQuestionInstruction(q) {
+  const instruction = (q.instruction || "").trim();
+  if (!instruction) return false;
+  const config = window.EXAM_REVIEW_CONFIG?.[state.currentExam?.id];
+  if (config?.forceShowInstructionIds?.some(id => String(id) === String(q.id))) return true;
+  if (instruction.toLowerCase() === (q.question || "").trim().toLowerCase()) return false;
+
+  // English directions are usually repeated; the passage and question stem already
+  // tell students what to do. Keep only question-specific source data here.
+  const genericDirection = /^(hãy chọn|em chọn|chọn phương án|choose|mark the letter|listen to|read the passage|read the text|complete|find the word|find the mistake|give the correct|rewrite|arrange|work out|select|indicate|decide|use the|fill in|four phrases|circle|underline)\b/i;
+  if (genericDirection.test(instruction)) return false;
+
+  // Keep question-specific math givens visible, including formula data.
+  return /\$|\\\(|\\frac|\\sqrt|[A-Za-z]\s*=|\b(?:cho|với|biết rằng|given that|suppose)\b/i.test(instruction);
+}
+
+function validateExamData(exam, catalogEntry) {
+  const issues = [];
+  const questions = Array.isArray(exam.questions) ? exam.questions : [];
+  if (!questions.length) issues.push("Không có câu hỏi.");
+  if (catalogEntry?.questionsCount !== questions.length) {
+    issues.push(`Danh mục ghi ${catalogEntry?.questionsCount ?? "?"} câu, dữ liệu có ${questions.length} câu.`);
+  }
+
+  const seenIds = new Set();
+  questions.forEach((question, index) => {
+    const label = `Câu ${index + 1} (ID ${question.id ?? "?"})`;
+    if (question.id == null || seenIds.has(String(question.id))) issues.push(`${label}: thiếu hoặc trùng ID.`);
+    seenIds.add(String(question.id));
+    if (!question.question?.trim()) issues.push(`${label}: thiếu nội dung.`);
+    if (!Array.isArray(question.options) || question.options.length < 2) {
+      issues.push(`${label}: thiếu lựa chọn.`);
+    } else {
+      const keys = question.options.map(option => option.key);
+      if (new Set(keys).size !== keys.length) issues.push(`${label}: trùng ký hiệu lựa chọn.`);
+      if (!keys.includes(question.correctAnswer)) issues.push(`${label}: đáp án ${question.correctAnswer ?? "trống"} không có trong lựa chọn.`);
+    }
+  });
+  return issues;
+}
+
+function questionNeedsAudioSkip(q) {
+  const config = window.EXAM_REVIEW_CONFIG?.[state.currentExam?.id];
+  return !!config?.audioUnavailable && /listening|kỹ năng nghe/i.test(q.part || "");
+}
+
 function renderCurrentQuestion() {
   const q = state.currentExam.questions[state.currentIndex];
   if (!q) return;
@@ -357,31 +439,40 @@ function renderCurrentQuestion() {
 
   // Streamlined category tag (Less text clutter!)
   const tagEl = document.getElementById("question-part-tag");
-  let displayCategory = "Trắc nghiệm";
-  if (q.part) {
-    // Simplify long headings
-    displayCategory = q.part
-      .replace(/^PHẦN\s+[IVXLCDM]+:?\s*/i, "")
-      .replace(/^BÀI\s+[0-9]+:?\s*/i, "")
-      .trim();
-    if (displayCategory.length > 25) {
-      displayCategory = displayCategory.substring(0, 22) + "...";
+  tagEl.textContent = getQuestionPartLabel(q.part);
+
+  const instructionBox = document.getElementById("question-instruction-box");
+  if (instructionBox) {
+    if (shouldShowQuestionInstruction(q)) {
+      instructionBox.classList.remove("hidden");
+      instructionBox.innerHTML = formatMathText(q.instruction);
+    } else {
+      instructionBox.classList.add("hidden");
+      instructionBox.innerHTML = "";
     }
   }
-  tagEl.textContent = displayCategory;
 
-  // Audio files are not included with the current English exam data. Tell students clearly.
+  // Mark listening questions that have no source audio and allow students to skip them.
   const audioNoticeId = "listening-audio-notice";
   let audioNotice = document.getElementById(audioNoticeId);
-  const isListening = /listening|kỹ năng nghe/i.test(q.part || "");
-  if (isListening && !audioNotice) {
+  const needsAudioSkip = questionNeedsAudioSkip(q);
+  if (needsAudioSkip && !audioNotice) {
     audioNotice = document.createElement("div");
     audioNotice.id = audioNoticeId;
-    audioNotice.className = "mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-base leading-relaxed text-amber-950";
-    audioNotice.innerHTML = "<strong class=\"block text-lg\">🔊 Phần nghe</strong><span>Đề gốc có yêu cầu nghe nhưng hiện chưa có file âm thanh. Em có thể luyện câu hỏi và xem lời giải; phần nghe sẽ cần bổ sung audio từ đề gốc.</span>";
-    document.getElementById("question-context-box").before(audioNotice);
+    audioNotice.className = "audio-skip-notice mb-4 rounded-2xl border-2 border-rose-400 bg-rose-50 p-4 text-base leading-relaxed text-rose-950";
+    document.getElementById("question-instruction-box").after(audioNotice);
   }
-  if (audioNotice) audioNotice.classList.toggle("hidden", !isListening);
+  if (audioNotice) {
+    audioNotice.classList.toggle("hidden", !needsAudioSkip);
+    if (needsAudioSkip) {
+      audioNotice.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div><strong class="block text-lg">Phần nghe · Có thể bỏ qua</strong><span>Đề hiện chưa có tệp âm thanh. Câu này sẽ không tính điểm nếu em bỏ qua.</span></div>
+          <button id="btn-skip-audio-question" class="min-h-12 rounded-xl bg-rose-600 px-5 py-3 text-base font-extrabold text-white hover:bg-rose-700">Bỏ qua câu nghe</button>
+        </div>`;
+      document.getElementById("btn-skip-audio-question").addEventListener("click", skipCurrentAudioQuestion);
+    }
+  }
 
   // Reading Passage / Context Box (Compact)
   const contextBox = document.getElementById("question-context-box");
@@ -389,7 +480,7 @@ function renderCurrentQuestion() {
   if (q.context) {
     contextBox.classList.remove("hidden");
     contextContent.innerHTML = `
-      <div class="text-xs text-slate-700 leading-relaxed whitespace-pre-line bg-white p-3 rounded-lg border border-slate-200 font-medium max-h-48 overflow-y-auto">
+      <div class="text-base sm:text-lg text-slate-800 leading-relaxed whitespace-pre-line bg-white p-4 rounded-xl border border-slate-200 font-medium max-h-72 overflow-y-auto">
         ${q.context}
       </div>
     `;
@@ -529,6 +620,7 @@ function handleOptionClick(key) {
   const q = state.currentExam.questions[state.currentIndex];
   if (!q) return;
 
+  delete state.skippedQuestions[q.id];
   state.userAnswers[q.id] = key;
 
   if (state.mode === "quiz") {
@@ -581,6 +673,23 @@ function clearCurrentAnswer() {
   renderQuestionPalette();
 }
 
+function skipCurrentAudioQuestion() {
+  const q = state.currentExam?.questions[state.currentIndex];
+  if (!q || !questionNeedsAudioSkip(q)) return;
+  state.skippedQuestions[q.id] = true;
+  delete state.userAnswers[q.id];
+  delete state.quizFeedback[q.id];
+  renderQuestionPalette();
+  if (state.currentIndex < state.currentExam.questions.length - 1) {
+    state.currentIndex++;
+    renderCurrentQuestion();
+    renderQuestionPalette();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    openSubmitConfirmModal();
+  }
+}
+
 function toggleFlagCurrentQuestion() {
   const q = state.currentExam.questions[state.currentIndex];
   if (!q) return;
@@ -613,6 +722,7 @@ function renderQuestionPalette() {
     const isAnswered = state.userAnswers[q.id] !== undefined;
     const isCurrent = idx === state.currentIndex;
     const isFlagged = !!state.flaggedQuestions[q.id];
+    const isSkipped = !!state.skippedQuestions[q.id];
 
     if (isAnswered) answeredCount++;
     if (isFlagged) flaggedCount++;
@@ -622,7 +732,8 @@ function renderQuestionPalette() {
       btn.className = "q-btn";
       btn.textContent = idx + 1;
 
-      if (isAnswered) btn.classList.add("answered");
+      if (isSkipped) btn.classList.add("skipped");
+      else if (isAnswered) btn.classList.add("answered");
       else btn.classList.add("unanswered");
 
       if (isCurrent) btn.classList.add("current");
@@ -643,7 +754,8 @@ function renderQuestionPalette() {
   });
 
   // Update stats counters
-  const unansweredCount = total - answeredCount;
+  const skippedCount = Object.values(state.skippedQuestions).filter(Boolean).length;
+  const unansweredCount = total - answeredCount - skippedCount;
   const aEl = document.getElementById("stat-answered-count");
   const uEl = document.getElementById("stat-unanswered-count");
   const fEl = document.getElementById("stat-flagged-count");
@@ -689,10 +801,11 @@ function goToNextQuestion() {
 // ==========================================
 function openSubmitConfirmModal() {
   sfx.click();
-  const total = state.currentExam.questions.length;
+  const skippedCount = Object.values(state.skippedQuestions).filter(Boolean).length;
+  const total = state.currentExam.questions.length - skippedCount;
   let answered = 0;
   state.currentExam.questions.forEach(q => {
-    if (state.userAnswers[q.id] !== undefined) answered++;
+    if (!state.skippedQuestions[q.id] && state.userAnswers[q.id] !== undefined) answered++;
   });
   const unanswered = total - answered;
 
@@ -702,7 +815,10 @@ function openSubmitConfirmModal() {
 
   const warning = document.getElementById("modal-submit-warning");
   if (unanswered > 0) {
-    warning.textContent = `Chú ý: Bạn còn ${unanswered} câu chưa hoàn thành!`;
+    warning.textContent = `${unanswered} câu chưa làm${skippedCount ? ` · ${skippedCount} câu nghe được bỏ qua, không tính điểm` : ""}.`;
+    warning.classList.remove("hidden");
+  } else if (skippedCount > 0) {
+    warning.textContent = `${skippedCount} câu nghe được bỏ qua, không tính điểm.`;
     warning.classList.remove("hidden");
   } else {
     warning.classList.add("hidden");
@@ -720,12 +836,16 @@ function submitExam() {
   clearInterval(state.timerInterval);
   state.isSubmitted = true;
 
-  const total = state.currentExam.questions.length;
+  let skippedCount = 0;
   let correctCount = 0;
   let wrongCount = 0;
   let unansweredCount = 0;
 
   state.currentExam.questions.forEach(q => {
+    if (state.skippedQuestions[q.id]) {
+      skippedCount++;
+      return;
+    }
     const userAns = state.userAnswers[q.id];
     if (userAns === undefined) {
       unansweredCount++;
@@ -736,9 +856,10 @@ function submitExam() {
     }
   });
 
-  const rawScore = (correctCount / total) * 10;
+  const total = state.currentExam.questions.length - skippedCount;
+  const rawScore = total > 0 ? (correctCount / total) * 10 : 0;
   const finalScore = Math.round(rawScore * 10) / 10;
-  const percentage = Math.round((correctCount / total) * 100);
+  const percentage = total > 0 ? Math.round((correctCount / total) * 100) : 0;
   const timeSpentSec = (state.currentExam.durationMinutes * 60) - Math.max(0, state.timeRemaining);
   const timeFormatted = `${Math.floor(timeSpentSec / 60)}p ${timeSpentSec % 60}s`;
 
@@ -753,6 +874,7 @@ function submitExam() {
     percentage: percentage,
     correctCount: correctCount,
     totalCount: total,
+    skippedCount,
     timeSpent: timeFormatted,
     userAnswers: { ...state.userAnswers },
     mode: state.mode
@@ -808,6 +930,11 @@ function renderResultScreen(item) {
   document.getElementById("result-score-val").textContent = item.score.toFixed(1);
   document.getElementById("result-percentage").textContent = `${item.percentage}%`;
   document.getElementById("result-correct-count").textContent = `${item.correctCount} / ${item.totalCount}`;
+  const skippedNote = document.getElementById("result-skipped-note");
+  if (skippedNote) {
+    skippedNote.textContent = item.skippedCount ? `Đã bỏ qua ${item.skippedCount} câu nghe thiếu audio · không tính điểm` : "";
+    skippedNote.classList.toggle("hidden", !item.skippedCount);
+  }
   document.getElementById("result-time-spent").textContent = item.timeSpent;
 
   // Score feedback and rank follow the requested score bands.
@@ -970,16 +1097,19 @@ function renderDetailedReview() {
     const userAns = state.userAnswers[q.id];
     const isCorrect = userAns === q.correctAnswer;
     const isUnanswered = userAns === undefined;
+    const isSkipped = !!state.skippedQuestions[q.id];
 
-    if (filter === "wrong" && (isCorrect || isUnanswered)) return;
-    if (filter === "correct" && !isCorrect) return;
-    if (filter === "unanswered" && !isUnanswered) return;
+    if (filter === "wrong" && (isCorrect || isUnanswered || isSkipped)) return;
+    if (filter === "correct" && (!isCorrect || isSkipped)) return;
+    if (filter === "unanswered" && (!isUnanswered || isSkipped)) return;
 
     const card = document.createElement("div");
     card.className = "p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm transition-all";
 
     let statusBadge = "";
-    if (isCorrect) {
+    if (isSkipped) {
+      statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-rose-100 text-rose-800">Đã bỏ qua · thiếu audio</span>`;
+    } else if (isCorrect) {
       statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-emerald-100 text-emerald-800 flex items-center gap-1">✓ Đúng</span>`;
     } else if (isUnanswered) {
       statusBadge = `<span class="px-2.5 py-1 text-xs font-bold rounded-md bg-slate-100 text-slate-600 flex items-center gap-1">⚪ Chưa làm</span>`;
@@ -996,15 +1126,19 @@ function renderDetailedReview() {
         ${statusBadge}
       </div>
 
-      ${q.context ? `
-        <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200 mb-3 whitespace-pre-line">${q.context}</div>
+      ${shouldShowQuestionInstruction(q) ? `
+        <div class="mb-3 rounded-xl border border-blue-200 bg-blue-50 p-4 text-base leading-relaxed">${formatMathText(q.instruction)}</div>
       ` : ""}
 
-      <div class="font-semibold text-slate-900 mb-3 text-sm sm:text-base">${formatMathText(q.question)}</div>
+      ${q.context ? `
+        <div class="text-base text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-200 mb-3 whitespace-pre-line">${q.context}</div>
+      ` : ""}
+
+      <div class="font-semibold text-slate-900 mb-4 text-lg sm:text-xl leading-relaxed">${formatMathText(q.question)}</div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3.5">
         ${q.options.map(opt => {
-          let optClass = "p-2.5 sm:p-3 rounded-xl border text-xs sm:text-sm font-medium flex items-center gap-2.5 ";
+          let optClass = "p-3 sm:p-4 rounded-2xl border text-base sm:text-lg font-medium flex items-center gap-3 ";
           if (opt.key === q.correctAnswer) {
             optClass += "border-emerald-500 bg-emerald-50 text-emerald-950 font-semibold ring-1 ring-emerald-500";
           } else if (userAns === opt.key && !isCorrect) {
@@ -1052,7 +1186,7 @@ function setReviewFilter(filter) {
 function retryWrongQuestionsOnly() {
   if (!state.currentExam) return;
   const wrongQuestions = state.currentExam.questions.filter(q => {
-    return state.userAnswers[q.id] !== q.correctAnswer;
+    return !state.skippedQuestions[q.id] && state.userAnswers[q.id] !== undefined && state.userAnswers[q.id] !== q.correctAnswer;
   });
 
   if (wrongQuestions.length === 0) {
@@ -1188,7 +1322,7 @@ function renderHistoryModal() {
         </div>
         <h4 class="font-bold text-slate-900 text-xs sm:text-sm truncate">${item.examTitle}</h4>
         <div class="text-xs text-slate-500 mt-0.5">
-          Đúng: <b class="text-emerald-600">${item.correctCount}/${item.totalCount}</b> câu (${item.percentage}%) • Thời gian: ${item.timeSpent}
+          Đúng: <b class="text-emerald-600">${item.correctCount}/${item.totalCount}</b> câu (${item.percentage}%)${item.skippedCount ? ` • Bỏ qua: ${item.skippedCount}` : ""} • Thời gian: ${item.timeSpent}
         </div>
       </div>
       <div class="text-right flex flex-col items-end flex-shrink-0">

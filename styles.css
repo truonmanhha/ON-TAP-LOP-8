@@ -1,6 +1,4 @@
 /* Styles for Quiz & Exam System */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
-
 :root {
   --primary: #2563EB;
   --primary-hover: #1D4ED8;
@@ -26,7 +24,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: Arial, "Segoe UI", Tahoma, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -75,10 +73,16 @@ body.dashboard-active #btn-open-share,
 body.dashboard-active #btn-toggle-sound,
 body.dashboard-active #timer-pill,
 body.dashboard-active #mobile-bottom-bar { display: none !important; }
+#question-counter { font-size: 1.25rem; }
+#question-part-tag { padding: .35rem .7rem; border-radius: .75rem; font-size: .9rem; }
+#question-context-content { font-size: 1.08rem; line-height: 1.8; }
+#btn-prev, #btn-next, #btn-flag, #btn-clear-selection { min-height: 3.25rem; font-size: 1rem; }
+.audio-skip-notice { box-shadow: 0 4px 14px rgba(190, 24, 93, .08); }
+.q-btn.skipped { background: #ffe4e6; border: 2px solid #e11d48; color: #9f1239; }
 
 @media (max-width: 640px) {
-  #question-text { font-size: 1.2rem; }
-  #options-container .option-card { min-height: 4rem; font-size: 1.05rem; }
+  #question-text { font-size: 1.28rem; }
+  #options-container .option-card { min-height: 4.1rem; font-size: 1.125rem; }
   .katex { font-size: 1.08em; }
 }
 
@@ -257,7 +261,7 @@ body.dashboard-active #mobile-bottom-bar { display: none !important; }
 }
 
 .font-playfair {
-  font-family: 'Playfair Display', serif;
+  font-family: Georgia, "Times New Roman", serif;
 }
 
 /* Confetti canvas */
