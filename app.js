@@ -469,6 +469,29 @@ function getMappedOptionText(optionText, question, revealAnswers = false) {
   }).join("  →  ");
 }
 
+function getFullPassageContext(question) {
+  const siblings = state.currentExam?.questions?.filter(item => item.part === question.part && item.context) || [];
+  return siblings.sort((a, b) => getPassageBlankNumbers(b.context).length - getPassageBlankNumbers(a.context).length || b.context.length - a.context.length)[0]?.context || question.context || "";
+}
+
+function buildAnsweredContext(context, question) {
+  if (!context) return "";
+  const active = getActiveBlankNumbers(question);
+  const selected = question.options?.find(option => option.key === state.userAnswers[question.id]);
+  if (!selected) return context;
+  let html = context;
+  active.forEach(number => {
+    const answerPart = selected.text.split(/\s*[-–—]\s*/).find(part => new RegExp(`\\|\\s*${number}\\s*\\|`).test(part));
+    const answer = answerPart
+      ? answerPart.replace(new RegExp(`^.*?\\|\\s*${number}\\s*\\|\\s*`), "").trim()
+      : (active.length === 1 ? selected.text : null);
+    if (!answer) return;
+    const pattern = new RegExp(`\\(\\s*${number}\\s*\\)\\s*_{2,}`);
+    html = html.replace(pattern, `<mark class="answered-blank">(${number}) ${answer}</mark>`);
+  });
+  return html;
+}
+
 function getArrangementSolution(question) {
   const answer = question.options?.find(option => option.key === question.correctAnswer)?.text || "";
   return /arrange|logical (?:dialogue|letter|paragraph) order|correct sequence/i.test(`${question.question || ""} ${question.instruction || ""}`)
@@ -535,11 +558,12 @@ function renderCurrentQuestion() {
   // Reading Passage / Context Box (Compact)
   const contextBox = document.getElementById("question-context-box");
   const contextContent = document.getElementById("question-context-content");
-  if (q.context) {
+  const fullPassageContext = getFullPassageContext(q);
+  if (fullPassageContext) {
     contextBox.classList.remove("hidden");
     contextContent.innerHTML = `
       <div class="text-base sm:text-lg text-slate-800 leading-relaxed whitespace-pre-line bg-white p-4 rounded-xl border border-slate-200 font-medium max-h-72 overflow-y-auto">
-        ${buildResolvedContext(q.context, q, state.isSubmitted)}
+        ${buildAnsweredContext(buildResolvedContext(fullPassageContext, q, state.isSubmitted), q)}
       </div>
     `;
   } else {

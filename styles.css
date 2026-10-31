@@ -82,6 +82,7 @@ body.dashboard-active #mobile-bottom-bar { display: none !important; }
 .resolved-answer-map { display:flex; flex-wrap:wrap; align-items:center; gap:.55rem; border:1px solid #bfdbfe; background:#eff6ff; color:#1e3a8a; border-radius:1rem; padding:.8rem 1rem; font-size:1rem; line-height:1.65; }
 .resolved-answer-map b { color:#172554; }
 .resolved-blank { background:#dcfce7; color:#14532d; border:1px solid #86efac; border-radius:.4rem; padding:.05rem .3rem; font-weight:800; }
+.answered-blank { background:#dcfce7; color:#14532d; border:1px solid #86efac; border-radius:.4rem; padding:.05rem .3rem; font-weight:800; }
 .hint-number { display:inline-flex; align-items:center; border-radius:.55rem; background:#dbeafe; color:#1d4ed8; padding:.1rem .45rem; font-weight:900; }
 
 @media (max-width: 640px) {
