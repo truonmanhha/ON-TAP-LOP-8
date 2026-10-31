@@ -476,6 +476,8 @@ body.halloween-theme input::placeholder { color: #a1a1aa !important; }
 body.halloween-theme .option-card { background-color: #252528 !important; border-color: #414147 !important; }
 body.halloween-theme .option-card:hover { background-color: #30251f !important; border-color: #c2410c !important; }
 body.halloween-theme .option-card.selected { background-color: #3b1c10 !important; border-color: #f97316 !important; }
+body.halloween-theme .audio-skip-notice { background-color: #3b1720 !important; border-color: #e11d48 !important; color: #ffe4e6 !important; }
+body.halloween-theme .audio-skip-notice strong { color: #fecdd3 !important; }
 body.halloween-theme .q-btn.unanswered { background-color: #202023 !important; border-color: #414147 !important; color: #d4d4d8 !important; }
 body.halloween-theme .q-btn.answered { background-color: #e85d04 !important; border-color: #e85d04 !important; }
 body.halloween-theme .q-btn.current { border-color: #fb923c !important; outline-color: #7c2d12 !important; }
