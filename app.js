@@ -723,7 +723,7 @@ function renderCurrentQuestion() {
   }
 
   // Render Math KaTeX
-  renderMathInElement();
+  renderAllMathInElement();
 }
 
 // ==========================================
@@ -1287,7 +1287,7 @@ function renderDetailedReview() {
     container.appendChild(card);
   });
 
-  renderMathInElement();
+  renderAllMathInElement();
 }
 
 function setReviewFilter(filter) {
@@ -1460,7 +1460,7 @@ function formatMathText(str) {
   return str;
 }
 
-function renderMathInElement() {
+function renderAllMathInElement() {
   if (window.renderMathInElement) {
     try {
       window.renderMathInElement(document.body, {
