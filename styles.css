@@ -439,7 +439,7 @@ body.halloween-theme .halloween-hero::after {
   filter: drop-shadow(0 0 24px rgba(249, 115, 22, .45));
 }
 body.halloween-theme .halloween-hero h2 {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, "Segoe UI", Tahoma, sans-serif;
   text-shadow: 0 2px 18px rgba(0, 0, 0, .38);
 }
 body.halloween-theme #view-dashboard .halloween-hero .bg-white {
