@@ -1,0 +1,293 @@
+/* Styles for Quiz & Exam System */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+
+:root {
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --primary-light: #EFF6FF;
+  --success: #10B981;
+  --success-hover: #059669;
+  --success-light: #ECFDF5;
+  --danger: #EF4444;
+  --danger-light: #FEF2F2;
+  --warning: #F59E0B;
+  --warning-light: #FFFBEB;
+  --slate-50: #F8FAFC;
+  --slate-100: #F1F5F9;
+  --slate-200: #E2E8F0;
+  --slate-300: #CBD5E1;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1E293B;
+  --slate-900: #0F172A;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: #F4F6F9;
+  color: var(--slate-800);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Option Card Styles */
+.option-card {
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 2px solid #E2E8F0;
+  background-color: #FFFFFF;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.option-card:hover {
+  border-color: #93C5FD;
+  background-color: #F8FAFC;
+  transform: translateY(-1px);
+}
+
+.option-card:active {
+  transform: scale(0.985);
+}
+
+.option-card.selected {
+  border-color: #2563EB;
+  background-color: #EFF6FF;
+  box-shadow: 0 0 0 1px #2563EB, 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+.option-card.correct {
+  border-color: #10B981 !important;
+  background-color: #ECFDF5 !important;
+  box-shadow: 0 0 0 1.5px #10B981, 0 4px 14px rgba(16, 185, 129, 0.18);
+  animation: pop-bounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.option-card.wrong {
+  border-color: #EF4444 !important;
+  background-color: #FEF2F2 !important;
+  box-shadow: 0 0 0 1.5px #EF4444;
+  animation: shake 0.4s ease-in-out;
+}
+
+/* Question Palette Grid Items */
+.q-btn {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 0.65rem;
+  transition: all 0.15s ease;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* Unanswered State (Mockup default) */
+.q-btn.unanswered {
+  background-color: #F8FAFC;
+  border: 1.5px solid #E2E8F0;
+  color: #64748B;
+}
+.q-btn.unanswered:hover {
+  border-color: #93C5FD;
+  color: #1E293B;
+  background-color: #FFFFFF;
+}
+
+/* Answered State (Mockup Blue filled) */
+.q-btn.answered {
+  background-color: #3B82F6;
+  border: 1.5px solid #3B82F6;
+  color: #FFFFFF;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Active / Current viewing */
+.q-btn.current {
+  border: 2.5px solid #1D4ED8 !important;
+  outline: 2px solid #93C5FD;
+  outline-offset: 1px;
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+/* Flagged state */
+.q-btn.flagged::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #F59E0B;
+  box-shadow: 0 0 0 1.5px #FFFFFF;
+}
+
+/* Review States */
+.q-btn.review-correct {
+  background-color: #10B981;
+  border-color: #10B981;
+  color: #FFFFFF;
+}
+
+.q-btn.review-wrong {
+  background-color: #EF4444;
+  border-color: #EF4444;
+  color: #FFFFFF;
+}
+
+/* ==========================================
+   ANIMATIONS & CELEBRATION EFFECTS
+========================================== */
+@keyframes pop-bounce {
+  0% { transform: scale(0.92); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+@keyframes gift-wiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  15% { transform: rotate(-8deg) scale(1.05); }
+  30% { transform: rotate(8deg) scale(1.08); }
+  45% { transform: rotate(-6deg) scale(1.05); }
+  60% { transform: rotate(6deg) scale(1.08); }
+  75% { transform: rotate(-3deg) scale(1.02); }
+}
+
+.gift-box-animate {
+  animation: gift-wiggle 1.8s infinite ease-in-out;
+  cursor: pointer;
+  filter: drop-shadow(0 10px 20px rgba(245, 158, 11, 0.45));
+}
+.gift-box-animate:hover {
+  transform: scale(1.12) !important;
+}
+
+@keyframes ray-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-ray-spin {
+  animation: ray-spin 20s linear infinite;
+}
+
+@keyframes float-up {
+  0% { opacity: 0; transform: translateY(12px) scale(0.9); }
+  30% { opacity: 1; transform: translateY(-4px) scale(1.05); }
+  70% { opacity: 1; transform: translateY(-8px) scale(1); }
+  100% { opacity: 0; transform: translateY(-24px) scale(0.95); }
+}
+
+.floating-toast {
+  animation: float-up 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+/* Mobile Bottom Sheet Drawer */
+.mobile-drawer-sheet {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(100%);
+}
+.mobile-drawer-sheet.open {
+  transform: translateY(0);
+}
+
+/* Certificate Styles */
+.certificate-frame {
+  border: 10px solid #D97706;
+  outline: 3px dashed #B45309;
+  outline-offset: -7px;
+  background: radial-gradient(circle at center, #FFFDF5 0%, #FEF3C7 100%);
+  position: relative;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Confetti canvas */
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* KaTeX formula polish */
+.katex-display {
+  margin: 0.4em 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Glassmorphism modals */
+.modal-backdrop {
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(5px);
+}
+
+/* Safe area padding for mobile notches */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+
+/* Print view for Certificate */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #certificate-to-print, #certificate-to-print * {
+    visibility: visible;
+  }
+  #certificate-to-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+    box-shadow: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
