@@ -125,7 +125,7 @@ class QuizAudio {
     this.theme = new Audio("assets/audio/quiz-theme.mp3");
     this.wrong.preload = "auto";
     this.theme.preload = "auto";
-    this.theme.loop = true;
+    this.theme.loop = false;
     this.theme.volume = 0.3;
     this.wrong.volume = 0.8;
   }
