@@ -563,8 +563,17 @@ body.halloween-theme textarea {
 }
 body.halloween-theme input::placeholder { color: #a1a1aa !important; }
 body.halloween-theme .option-card { background-color: #252528 !important; border-color: #414147 !important; }
+body.halloween-theme .option-card.correct { background-color: #12352b !important; border-color: #34d399 !important; color: #d1fae5 !important; }
+body.halloween-theme .option-card.wrong { background-color: #3b1c24 !important; border-color: #fb7185 !important; color: #ffe4e6 !important; }
 body.halloween-theme .option-card:hover { background-color: #30251f !important; border-color: #c2410c !important; }
 body.halloween-theme .option-card.selected { background-color: #3b1c10 !important; border-color: #f97316 !important; }
+body.halloween-theme #quiz-feedback-card { border-color: #414147 !important; }
+body.halloween-theme #quiz-feedback-card.bg-emerald-50 { background-color: #12352b !important; color: #d1fae5 !important; }
+body.halloween-theme #quiz-feedback-card.bg-rose-50 { background-color: #3b1c24 !important; color: #ffe4e6 !important; }
+body.halloween-theme #quiz-feedback-card .bg-emerald-200 { background-color: #14532d !important; color: #a7f3d0 !important; }
+body.halloween-theme #quiz-feedback-card .text-emerald-800 { color: #a7f3d0 !important; }
+body.halloween-theme #quiz-feedback-card .text-rose-800 { color: #fecdd3 !important; }
+body.halloween-theme #quiz-feedback-card > div > div:last-child { background-color: #202023 !important; border-color: #52525b !important; color: #e4e4e7 !important; }
 body.halloween-theme .audio-skip-notice { background-color: #3b1720 !important; border-color: #e11d48 !important; color: #ffe4e6 !important; }
 body.halloween-theme .audio-skip-notice strong { color: #fecdd3 !important; }
 body.halloween-theme .q-btn.unanswered { background-color: #202023 !important; border-color: #414147 !important; color: #d4d4d8 !important; }
