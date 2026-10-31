@@ -1359,7 +1359,7 @@ function renderDashboard() {
     const grid = section.querySelector(".subject-exam-grid");
     subjectExams.forEach((exam, examIndex) => {
     const card = document.createElement("div");
-    card.className = "exam-card bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between";
+    card.className = "exam-card bg-[#222124] rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between";
     const halloweenCreatures = subject === "Tiếng Anh 8"
       ? HALLOWEEN_CARD_CHARACTERS.english
       : HALLOWEEN_CARD_CHARACTERS.math;
