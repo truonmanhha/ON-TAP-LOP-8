@@ -363,7 +363,7 @@
         </div>
 
         <!-- ======================================================== -->
-        <!-- REWARD / GIFT SECTION (The Requested Feature) -->
+        <!-- REWARD / GIFT SECTION -->
         <!-- ======================================================== -->
         <div id="reward-gift-banner" class="hidden mb-6 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-md relative overflow-hidden">
           <div class="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-10">
@@ -710,6 +710,17 @@
           <button type="button" onclick="closeScoreCelebration()" class="score-celebration-close">Xem kết quả</button>
         </div>
       </div>
+
+      <!-- Score celebration overlay and progress feedback -->
+      <div id="score-celebration" class="score-celebration hidden" aria-live="polite">
+        <div class="score-celebration-card">
+          <div id="score-celebration-icon" class="score-celebration-icon">🎉</div>
+          <p id="score-celebration-message" class="score-celebration-message"></p>
+          <p id="score-celebration-detail" class="score-celebration-detail"></p>
+          <button type="button" onclick="closeScoreCelebration()" class="score-celebration-close">Xem kết quả</button>
+        </div>
+      </div>
+
 
   <!-- FOOTER -->
   <footer class="bg-white border-t border-slate-200/80 py-4 text-center text-xs text-slate-500 hidden lg:block">
