@@ -771,13 +771,10 @@ function showScoreCelebration(score, feedback) {
   message.textContent = feedback.message;
   detail.textContent = feedback.detail || `Bạn đạt ${score.toFixed(1)} trên 10 điểm.`;
   overlay.classList.remove("hidden");
-  overlay.style.display = "grid";
 }
 
 function closeScoreCelebration() {
-  const overlay = document.getElementById("score-celebration");
-  overlay?.classList.add("hidden");
-  if (overlay) overlay.style.display = "none";
+  document.getElementById("score-celebration")?.classList.add("hidden");
 }
 
 function getScoreFeedback(score) {
