@@ -73,7 +73,8 @@ body.dashboard-active #btn-back-home,
 body.dashboard-active #header-mode-badge,
 body.dashboard-active #btn-open-share,
 body.dashboard-active #btn-toggle-sound,
-body.dashboard-active #timer-pill { display: none !important; }
+body.dashboard-active #timer-pill,
+body.dashboard-active #mobile-bottom-bar { display: none !important; }
 
 @media (max-width: 640px) {
   #question-text { font-size: 1.2rem; }
