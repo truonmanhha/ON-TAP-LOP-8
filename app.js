@@ -433,7 +433,8 @@ function getActiveBlankNumbers(question) {
   return questionNumbers.length ? questionNumbers : getPassageBlankNumbers(question.context || "");
 }
 
-function buildResolvedContext(context, question) {
+function buildResolvedContext(context, question, revealAnswers = false) {
+  if (!revealAnswers) return context || "";
   if (!context) return "";
   let html = context;
   const blankNumbers = getPassageBlankNumbers(context);
@@ -456,7 +457,8 @@ function buildResolvedContext(context, question) {
   return html;
 }
 
-function getMappedOptionText(optionText, question) {
+function getMappedOptionText(optionText, question, revealAnswers = false) {
+  if (!revealAnswers) return optionText;
   if (!/\|\s*\d+\s*\|/.test(optionText)) {
     const blankNumbers = getActiveBlankNumbers(question);
     return blankNumbers.length === 1 ? `(${blankNumbers[0]}) ${optionText}` : optionText;
@@ -537,7 +539,7 @@ function renderCurrentQuestion() {
     contextBox.classList.remove("hidden");
     contextContent.innerHTML = `
       <div class="text-base sm:text-lg text-slate-800 leading-relaxed whitespace-pre-line bg-white p-4 rounded-xl border border-slate-200 font-medium max-h-72 overflow-y-auto">
-        ${buildResolvedContext(q.context, q)}
+        ${buildResolvedContext(q.context, q, state.isSubmitted)}
       </div>
     `;
   } else {
@@ -596,7 +598,7 @@ function renderCurrentQuestion() {
         ` : opt.key}
       </div>
       <div class="flex-1 font-semibold text-slate-800">
-        <span>${formatMathText(getMappedOptionText(opt.text, q))}</span>
+        <span>${formatMathText(getMappedOptionText(opt.text, q, state.isSubmitted))}</span>
       </div>
     `;
 
@@ -1214,7 +1216,7 @@ function renderDetailedReview() {
       ` : ""}
 
       ${q.context ? `
-        <div class="text-base text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-200 mb-3 whitespace-pre-line">${buildResolvedContext(q.context, q)}</div>
+        <div class="text-base text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-200 mb-3 whitespace-pre-line">${buildResolvedContext(q.context, q, state.isSubmitted)}</div>
       ` : ""}
 
       ${getActiveBlankNumbers(q).length ? `
@@ -1238,7 +1240,7 @@ function renderDetailedReview() {
           return `
             <div class="${optClass}">
               <span class="w-6 h-6 rounded-md ${opt.key === q.correctAnswer ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'} flex items-center justify-center font-bold text-xs flex-shrink-0">${opt.key}</span>
-              <span class="flex-1">${formatMathText(getMappedOptionText(opt.text, q))}</span>
+              <span class="flex-1">${formatMathText(getMappedOptionText(opt.text, q, state.isSubmitted))}</span>
               ${opt.key === q.correctAnswer ? '<span class="text-[11px] text-emerald-700 font-bold ml-auto whitespace-nowrap">Đáp án đúng</span>' : ''}
             </div>
           `;
