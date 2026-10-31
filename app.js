@@ -748,6 +748,7 @@ function submitExam() {
   // Render first so feedback and celebration play on the result screen.
   renderResultScreen(historyItem);
   const feedback = getScoreFeedback(finalScore);
+  showScoreCelebration(finalScore, feedback);
   if (finalScore >= 8) {
     sfx.reward();
     [250, 950, 1650].forEach(delay => setTimeout(launchConfetti, delay));
@@ -760,12 +761,28 @@ function submitExam() {
   if (finalScore >= 9) setTimeout(launchConfetti, 2400);
 }
 
+function showScoreCelebration(score, feedback) {
+  const overlay = document.getElementById("score-celebration");
+  const icon = document.getElementById("score-celebration-icon");
+  const message = document.getElementById("score-celebration-message");
+  const detail = document.getElementById("score-celebration-detail");
+  if (!overlay || !icon || !message || !detail) return;
+  icon.textContent = feedback.icon || (score >= 8 ? "🎁" : score >= 6 ? "👍" : "📚");
+  message.textContent = feedback.message;
+  detail.textContent = feedback.detail || `Bạn đạt ${score.toFixed(1)} trên 10 điểm.`;
+  overlay.classList.remove("hidden");
+}
+
+function closeScoreCelebration() {
+  document.getElementById("score-celebration")?.classList.add("hidden");
+}
+
 function getScoreFeedback(score) {
-  if (score >= 9) return { message: "🏆 Xuất sắc! Thành tích quá đỉnh — mở quà thôi!", type: "streak" };
-  if (score >= 8) return { message: "🎉 Giỏi lắm! Ting tong — bạn nhận được hộp quà!", type: "success" };
-  if (score >= 6) return { message: "👍 Tạm ổn! Ôn thêm một chút là lên điểm ngay.", type: "info" };
-  if (score >= 5) return { message: "💪 Cố gắng thêm nhé — xem lại câu sai rồi thử lại!", type: "info" };
-  return { message: "📚 Chưa đạt mục tiêu lần này. Bình tĩnh xem lời giải, luyện thêm rồi thử lại nhé!", type: "info" };
+  if (score >= 9) return { message: "🏆 Xuất sắc! Thành tích quá đỉnh — mở quà thôi!", detail: "Hộp quà đặc biệt đang chờ bạn mở.", icon: "🏆", type: "streak" };
+  if (score >= 8) return { message: "🎉 Giỏi lắm! Ting tong — bạn nhận được hộp quà!", detail: "Bạn đã mở khóa quà bí ẩn và giấy khen danh dự.", icon: "🎁", type: "success" };
+  if (score >= 6) return { message: "👍 Tạm ổn! Ôn thêm một chút là lên điểm ngay.", detail: "Xem lại các câu sai để tiến gần mốc 8 điểm và mở quà.", icon: "💪", type: "info" };
+  if (score >= 5) return { message: "💪 Cố gắng thêm nhé — xem lại câu sai rồi thử lại!", detail: "Bạn đang tiến bộ. Mỗi lần luyện sẽ giúp nhớ bài tốt hơn.", icon: "📚", type: "info" };
+  return { message: "📚 Chưa đạt mục tiêu lần này. Bình tĩnh xem lời giải, luyện thêm rồi thử lại nhé!", detail: "Không sao cả — hãy bắt đầu từ những câu mình chưa chắc nhé.", icon: "🌱", type: "info" };
 }
 
 function renderResultScreen(item) {
@@ -798,6 +815,9 @@ function renderResultScreen(item) {
     giftBanner.querySelector("h4").textContent = item.score >= 9 ? "HỘP QUÀ XUẤT SẮC ĐANG CHỜ BẠN!" : "MỞ HỘP QUÀ MAY MẮN!";
     giftBanner.querySelector("p").textContent = "Mốc 8 điểm trở lên: mở hộp quà, nghe ting tong và nhận giấy khen danh dự.";
     giftBanner.querySelector("button span").textContent = "🎉 MỞ QUÀ NGAY";
+    giftBanner.querySelector(".gift-box-animate").setAttribute("role", "button");
+    giftBanner.querySelector(".gift-box-animate").setAttribute("tabindex", "0");
+    giftBanner.querySelector(".gift-box-animate").setAttribute("aria-label", "Mở hộp quà");
   }
 
   // Populate Certificate Data
